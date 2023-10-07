@@ -120,7 +120,7 @@
                     {
                         file_put_contents(
                             $this->file($key),
-                            '&lt;?php return '.🪄🔮🎩($value).';',
+                            '&lt;?php return '.🔮🎩🪄($value).';',
                         );
                     }
 
@@ -167,7 +167,7 @@
                      avg     0.22 ms - 0 bytes   0.17 ms - 0 bytes   0.17 ms - 0 bytes
                      total   18.09 ms            15.53 ms            16.30 ms
                     ------- ------------------- ------------------- -------------------
-                     Order   🥉                  🥇                   🥈
+                     Order   🥉                  🥇                  🥈
                     ------- ------------------- ------------------- -------------------
                 </code>
             </pre>
@@ -201,7 +201,7 @@
                      avg     0.18 ms - 0 bytes   0.16 ms - 0 bytes   0 ms - 0 bytes
                      total   16.55 ms            15.29 ms            0.28 ms 😳
                     ------- ------------------- ------------------- ----------------
-                     Order   🥉                  🥈                   🥇
+                     Order   🥉                  🥈                  🥇
                     ------- ------------------- ------------------- ----------------
                 </code>
             </pre>
@@ -216,7 +216,7 @@
                     {
                         file_put_contents(
                             $this->file($key),
-                            '&lt;?php return '.🪄🔮🎩($value).';',
+                            '&lt;?php return '.🔮🎩🪄($value).';',
                         );
                     }
 
@@ -424,13 +424,13 @@
                     );
                 </code>
             </pre>
-            <p class="fragment">🪄 Экспорт данных объекта</p>
-            <p class="fragment">🔮 Инстанциация</p>
-            <p class="fragment">🎩 Гидрация</p>
+            <p class="fragment">🔮 Извлечение</p>
+            <p class="fragment">🎩 Инстанциация</p>
+            <p class="fragment">🪄 Гидрация</p>
         </section>
 
         <section>
-            <h3>🪄 Экспорт данных объекта</h3>
+            <h3>🔮 Извлечение</h3>
         </section>
 
         <section>
@@ -543,7 +543,7 @@
         </section>
 
         <section>
-            <h3>🔮 Инстанциация</h3>
+            <h3>🎩 Инстанциация</h3>
         </section>
 
         <section>
@@ -628,7 +628,7 @@
         </section>
 
         <section>
-            <h3>🎩 Гидрация</h3>
+            <h3>🪄 Гидрация</h3>
         </section>
 
         <section>
@@ -688,7 +688,7 @@
                 </code>
             </pre>
             <pre class="fragment">
-                <code class="language-php" data-trim data-line-numbers="|3|5-7|9-11|13|">
+                <code class="language-php" data-trim data-line-numbers="1|3|5-7|9-11|13|">
                     private function property(string $class, string $key): ReflectionProperty
                     {
                         $parts = explode("\0", $key);
@@ -708,7 +708,7 @@
         </section>
 
         <section>
-            <h3>🪄🔮🎩 = Exporter</h3>
+            <h3>🔮🎩🪄 = Exporter</h3>
         </section>
 
         <section>
@@ -741,7 +741,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim data-line-numbers="|3-5|7-9|11-13|15-17|19-22|">
+                <code class="language-php" data-trim data-line-numbers="1|3-5|7-9|11-13|15-17|19-22|">
                     private function exportMixed(mixed $value): string
                     {
                         if ($value === null) {
@@ -771,7 +771,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim data-line-numbers>
+                <code class="language-php" data-trim data-line-numbers="1|3|5,8|6,7|10|">
                     private function exportArray(array $array): string
                     {
                         $code = '[';
@@ -908,7 +908,7 @@
                 </code>
             </pre>
             <pre class="fragment">
-                <code class="language-php" data-trim data-line-numbers="|2,8">
+                <code class="language-php" data-trim data-line-numbers="2,8">
                     [
                         ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
                             "\0Settlement\0type" => 'нп.',
@@ -929,7 +929,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim data-line-numbers="|12-23|4-6|">
+                <code class="language-php" data-trim data-line-numbers="12-23|4-6">
                     private function exportObject(object $object): string
                     {
                         return sprintf(
@@ -967,7 +967,7 @@
                 </code>
             </pre>
             <pre class="fragment">
-                <code class="language-php" data-trim data-line-numbers="|2,8">
+                <code class="language-php" data-trim data-line-numbers="2,8">
                     [
                         ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
                             "\0Settlement\0type" => 'нп.',
@@ -995,7 +995,7 @@
                 </code>
             </pre>
             <pre class="fragment">
-                <code class="language-php" data-trim data-line-numbers="|2,8">
+                <code class="language-php" data-trim data-line-numbers>
                     [
                         ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
                             "\0Settlement\0type" => 'нп.',
@@ -1041,7 +1041,7 @@
                 </code>
             </pre>
             <pre class="fragment">
-                <code class="language-php" data-trim data-line-numbers="|3,11|">
+                <code class="language-php" data-trim data-line-numbers="3,11">
                     [
                         ($h = new \Hydrator())->hydrate(
                             $o0 = $h->instantiate(\City::class),
@@ -1060,7 +1060,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim data-line-numbers="|1-4|12|13|16,18|8-10|">
+                <code class="language-php" data-trim data-line-numbers="1-4|12|13|16,18|8-10|">
                     /**
                      * @var SplObjectStorage&lt;object, non-empty-string&gt;
                      */
@@ -1084,6 +1084,32 @@
                             $this->exportArray((array) $object),
                         );
                     }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers>
+                    $yoshkarOla = new City('Йошкар-Ола', 8362);
+
+                    echo Exporter::export([$yoshkarOla, $yoshkarOla]);
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim data-line-numbers>
+                    [
+                        ($h = new \Hydrator())->hydrate(
+                            $o0 = $h->instantiate(\City::class),
+                            [
+                                "\0Settlement\0type" => 'нп.',
+                                "\0*\0name" => 'Йошкар-Ола',
+                                "\0City\0type" => 'г.',
+                                'code' => 8362,
+                            ],
+                        ),
+                        $o0,
+                    ]
                 </code>
             </pre>
         </section>
@@ -1158,7 +1184,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim data-line-numbers="|3-4|6-9|13|11,15-18|">
+                <code class="language-php" data-trim data-line-numbers="3-4|6-9|13|11,15-18|">
                     private function set(string $key, mixed $value): void
                     {
                         $file = $this->file($key);
