@@ -561,7 +561,7 @@
                     }
                 </code>
             </pre>
-            <pre>
+            <pre class="fragment">
                 <code class="language-php" data-trim data-line-numbers>
                     final class Hydrator
                     {
@@ -855,12 +855,12 @@
                     }
                 </code>
             </pre>
-            <pre>
+            <pre class="fragment">
                 <code class="language-php" data-trim data-line-numbers>
                     echo Exporter::export([123, ['Key' => 'Value']]);
                 </code>
             </pre>
-            <pre>
+            <pre class="fragment">
                 <code class="language-php" data-trim data-line-numbers>
                     [123,['Key'=>'Value']]
                 </code>
@@ -881,12 +881,12 @@
                     }
                 </code>
             </pre>
-            <pre>
+            <pre class="fragment">
                 <code class="language-php" data-trim data-line-numbers>
                     echo Exporter::export(new City('Йошкар-Ола', 8362));
                 </code>
             </pre>
-            <pre>
+            <pre class="fragment">
                 <code class="language-php" data-trim data-line-numbers>
                     ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
                         "\0Settlement\0type" => 'нп.',
