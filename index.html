@@ -27,7 +27,7 @@
         td.hljs-ln-code {
             white-space: pre;
         }
-        .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5, .reveal h6, .reveal pre, .reveal p {
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5, .reveal h6, .reveal pre, .reveal p, .reveal img {
             margin: 0 var(--r-block-margin) calc(var(--r-block-margin) * 2);
         }
         .reveal pre {
@@ -59,7 +59,8 @@
     <div class="slides">
         <section>
             <h1 class="r-fit-text">Кэш через OPcache</h1>
-            <p>Валентин Удальцов (<a href="https://t.me/phpyh">Пых</a>, <a href="https://youtube.com/@PHPPoint">PHP Point</a>)</p>
+            <p>Валентин Удальцов <a href="https://t.me/vudaltsov">@vudaltsov</a></p>
+            <p><a href="https://t.me/phpyh">Пых</a> / <a href="https://youtube.com/@PHPPoint">PHP Point</a></p>
         </section>
 
         <section>
@@ -104,7 +105,7 @@
             </pre>
             <p class="fragment">🤔</p>
             <pre class="fragment">
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     &lt;?php return new City('Йошкар-Ола', 8362);
                 </code>
             </pre>
@@ -229,7 +230,7 @@
         </section>
 
         <section>
-            <h3>var_export()</h3>
+            <h3><a href="https://www.php.net/manual/ru/function.var-export.php">var_export()</a></h3>
             <pre style="display: inline-block;">
                 <code class="language-php" style="text-align: center;" data-trim>
                 var_export(mixed $value, bool $return = false): ?string
@@ -347,7 +348,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     final class City
                     {
                         public function __construct(
@@ -360,7 +361,7 @@
                 </code>
             </pre>
             <pre class="fragment">
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     \City::__set_state(array(
                         'name' => 'Йошкар-Ола',
                         'code' => 8362,
@@ -379,7 +380,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     \City::__set_state(array(
                         'name' => 'Йошкар-Ола',
                         'code' => 8362,
@@ -387,7 +388,7 @@
                 </code>
             </pre>
             <pre class="fragment">
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     \Hydrator::hydrate(\City::class, [
                         'name' => 'Йошкар-Ола',
                         'code' => 8362,
@@ -395,7 +396,7 @@
                 </code>
             </pre>
             <pre class="fragment">
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     $hydrator = new \Hydrator();
                     $object = $hydrator->instantiate(\City::class);
                     $hydrator->hydrate($object, [
@@ -405,7 +406,7 @@
                 </code>
             </pre>
             <pre class="fragment">
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
                         'name' => 'Йошкар-Ола',
                         'code' => 8362,
@@ -423,18 +424,18 @@
                     );
                 </code>
             </pre>
-            <p class="fragment">🪄 Export object data</p>
-            <p class="fragment">🔮 Instantiate</p>
-            <p class="fragment">🎩 Hydrate</p>
+            <p class="fragment">🪄 Экспорт данных объекта</p>
+            <p class="fragment">🔮 Инстанциация</p>
+            <p class="fragment">🎩 Гидрация</p>
         </section>
 
         <section>
-            <h3>🪄 Export object data</h3>
+            <h3>🪄 Экспорт данных объекта</h3>
         </section>
 
         <section>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                 final class City
                 {
                     public function __construct(
@@ -542,12 +543,12 @@
         </section>
 
         <section>
-            <h3>🔮 Instantiate</h3>
+            <h3>🔮 Инстанциация</h3>
         </section>
 
         <section>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     final class City
                     {
                         private function __construct(string $name, int $code)
@@ -561,7 +562,7 @@
                 </code>
             </pre>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     final class Hydrator
                     {
                         /**
@@ -580,7 +581,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     final class Hydrator
                     {
                         /**
@@ -627,12 +628,12 @@
         </section>
 
         <section>
-            <h3>🎩 Hydrate</h3>
+            <h3>🎩 Гидрация</h3>
         </section>
 
         <section>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     final class Hydrator
                     {
                         /**
@@ -732,7 +733,7 @@
                 </code>
             </pre>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     Exporter::export($value);
                 </code>
             </pre>
@@ -785,12 +786,12 @@
                 </code>
             </pre>
             <pre class="fragment">
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     echo Exporter::export([123, ['Key' => 'Value']]);
                 </code>
             </pre>
             <pre class="fragment">
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     [0=>123,1=>['Key'=>'Value',],]
                 </code>
             </pre>
@@ -820,12 +821,12 @@
                 </code>
             </pre>
             <pre class="fragment">
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     echo Exporter::export([123, ['Key' => 'Value']]);
                 </code>
             </pre>
             <pre class="fragment">
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     [0=>123,1=>['Key'=>'Value']]
                 </code>
             </pre>
@@ -855,12 +856,12 @@
                 </code>
             </pre>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     echo Exporter::export([123, ['Key' => 'Value']]);
                 </code>
             </pre>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     [123,['Key'=>'Value']]
                 </code>
             </pre>
@@ -881,12 +882,12 @@
                 </code>
             </pre>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     echo Exporter::export(new City('Йошкар-Ола', 8362));
                 </code>
             </pre>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
                         "\0Settlement\0type" => 'нп.',
                         "\0*\0name" => 'Йошкар-Ола',
@@ -899,7 +900,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     echo Exporter::export([
                         new City('Йошкар-Ола', 8362),
                         new City('Йошкар-Ола', 8362),
@@ -928,7 +929,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim data-line-numbers>
+                <code class="language-php" data-trim data-line-numbers="|12-23|4-6|">
                     private function exportObject(object $object): string
                     {
                         return sprintf(
@@ -958,7 +959,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     echo Exporter::export([
                         new City('Йошкар-Ола', 8362),
                         new City('Йошкар-Ола', 8362),
@@ -987,7 +988,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     $yoshkarOla = new City('Йошкар-Ола', 8362);
 
                     echo Exporter::export([$yoshkarOla, $yoshkarOla]);
@@ -1015,7 +1016,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     $yoshkarOla = new City('Йошкар-Ола', 8362);
 
                     echo serialize([$yoshkarOla, $yoshkarOla]);
@@ -1033,7 +1034,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim>
+                <code class="language-php" data-trim data-line-numbers>
                     $yoshkarOla = new City('Йошкар-Ола', 8362);
 
                     echo Exporter::export([$yoshkarOla, $yoshkarOla]);
@@ -1107,7 +1108,7 @@
                 </code>
             </pre>
             <pre class="fragment">
-                <code class="language-php" data-trim data-line-numbers="|1-4,8-13,16,18|">
+                <code class="language-php" data-trim data-line-numbers>
                     ($h = new \Hydrator())->hydrate(
                         $o0 = $h->instantiate(\SelfReference::class),
                         ["\0SelfReference\0selfReference" => $o0],
@@ -1117,16 +1118,19 @@
         </section>
 
         <section>
-            <h3>TODO:</h3>
-            <ul>
-                <li>internal PHP classes</li>
-                <li>readonly properties</li>
-                <li><code class="hljs-title function_">__sleep</code></li>
-                <li><code class="hljs-title function_">__wakeup</code></li>
-                <li><code>Serializable</code></li>
-                <li><code class="hljs-title function_">__serialize</code></li>
-                <li><code class="hljs-title function_">__unserialize</code></li>
-            </ul>
+            <p>
+                internal PHP classes<br>
+                readonly properties<br>
+                <code class="hljs-title function_">__sleep()</code><br>
+                <code class="hljs-title function_">__wakeup()</code><br>
+                <code>Serializable</code><br>
+                <code class="hljs-title function_">__serialize()</code><br>
+                <code class="hljs-title function_">__unserialize()</code>
+            </p>
+        </section>
+
+        <section>
+            <h3>Cache via OPcache 😍</h3>
         </section>
 
         <section>
@@ -1149,6 +1153,7 @@
                 }
                 </code>
             </pre>
+            <p>🎉</p>
         </section>
 
         <section>
@@ -1175,6 +1180,17 @@
                     }
                 </code>
             </pre>
+        </section>
+
+        <section>
+            <p><code>composer install <a href="https://github.com/typhoon-php/exporter">typhoon-php/exporter</a></code></p>
+            <p><code>composer install <a href="https://github.com/typhoon-php/opcache">typhoon-php/opcache</a></code></p>
+        </section>
+
+        <section>
+            <h3>Спасибо за внимание!</h3>
+            <img style="width: 45%;" src="qr.png" alt="QR code">
+            <p><a href="https://t.me/vudaltsov">@vudaltsov</a> / <a href="https://t.me/phpyh">Пых</a> / <a href="https://youtube.com/@PHPPoint">PHP Point</a></p>
         </section>
     </div>
 </div>
