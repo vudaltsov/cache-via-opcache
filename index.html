@@ -1,0 +1,1194 @@
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/simple.min.css" id="theme">
+    <link rel="stylesheet" href="highlight-phpstorm-light-theme.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700;900&display=swap">
+    <style>
+        :root {
+            --r-main-font: 'Roboto', sans-serif;
+            --r-heading-font: 'Roboto', sans-serif;
+            --r-code-font: 'Roboto Mono', monospace;
+            --r-block-margin: 10px;
+        }
+        .reveal pre {
+            font-size: .50em;
+        }
+        .no-highlight {
+            padding: 1em !important;
+        }
+        .reveal .hljs {
+            min-height: auto;
+        }
+        td.hljs-ln-code {
+            white-space: pre;
+        }
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5, .reveal h6, .reveal pre, .reveal p {
+            margin: 0 var(--r-block-margin) calc(var(--r-block-margin) * 2);
+        }
+        .reveal pre {
+            width: auto;
+        }
+        .reveal pre code {
+            max-height: none;
+        }
+        .reveal .r-stack > * {
+            margin: 0;
+        }
+        .horizontal {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+        }
+        .horizontal > * {
+            flex-grow: 1;
+        }
+        .horizontal-half > * {
+            flex-grow: 0 !important;
+            width: calc(50% - var(--r-block-margin) * 2) !important;
+        }
+    </style>
+    <title>Кэш через OPcache</title>
+</head>
+<body>
+<div class="reveal">
+    <div class="slides">
+        <section>
+            <h1 class="r-fit-text">Кэш через OPcache</h1>
+            <p>Валентин Удальцов (<a href="https://t.me/phpyh">Пых</a>, <a href="https://youtube.com/@PHPPoint">PHP Point</a>)</p>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers>
+                final readonly class BasicCache
+                {
+                    public function set(string $key, mixed $value): void
+                    {
+                        file_put_contents($this->file($key), serialize($value));
+                    }
+
+                    public function get(string $key): mixed
+                    {
+                        return unserialize(file_get_contents($this->file($key)));
+                    }
+                }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers>
+                final class City
+                {
+                    public function __construct(
+                        public string $name,
+                        public int $code,
+                    ) {}
+                }
+
+                $yoshkarOla = new City('Йошкар-Ола', 8362);
+
+                $basicCache->set($yoshkarOla);
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="no-highlight" data-trim>
+                    O:4:"City":2:{s:4:"name";s:19:"Йошкар-Ола";s:4:"code";i:8362;}
+                </code>
+            </pre>
+            <p class="fragment">🤔</p>
+            <pre class="fragment">
+                <code class="language-php" data-trim>
+                    &lt;?php return new City('Йошкар-Ола', 8362);
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers>
+                final readonly class NewCache
+                {
+                    public function set(string $key, mixed $value): void
+                    {
+                        file_put_contents(
+                            $this->file($key),
+                            '&lt;?php return '.🪄🔮🎩($value).';',
+                        );
+                    }
+
+                    public function get(string $key): mixed
+                    {
+                        return include $this->file($key);
+                    }
+                }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers>
+                    file_put_contents('serialize', serialize($yoshkarOla));
+                    file_put_contents('igbinary', igbinary_serialize($yoshkarOla));
+                    file_put_contents('code', "&lt;?php return new City('Йошка...");
+
+                    DragonCode\Benchmark\Benchmark::start()
+                        ->compare([
+                            'serialized' => static function (): void {
+                                unserialize(file_get_contents('serialized'));
+                            },
+                            'igbinary' => static function (): void {
+                                igbinary_unserialize(file_get_contents('igbinary'));
+                            },
+                            'code' => static function (): void {
+                                include 'code';
+                            },
+                        ]);
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre style="display:inline-block;">
+                <code class="language-php" data-trim>
+                    ------- ------------------- ------------------- -------------------
+                             serialize           igbinary            code
+                    ------- ------------------- ------------------- -------------------
+                     min     0.13 ms - 0 bytes   0.13 ms - 0 bytes   0.13 ms - 0 bytes
+                     max     0.28 ms - 0 bytes   0.20 ms - 0 bytes   0.28 ms - 0 bytes
+                     avg     0.22 ms - 0 bytes   0.17 ms - 0 bytes   0.17 ms - 0 bytes
+                     total   18.09 ms            15.53 ms            16.30 ms
+                    ------- ------------------- ------------------- -------------------
+                     Order   🥉                  🥇                   🥈
+                    ------- ------------------- ------------------- -------------------
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <h4>php.ini</h4>
+            <div class="r-stack">
+                <pre>
+                    <code class="language-ini" data-trim>
+                    ; Determines if Zend OPCache is enabled for the CLI version of PHP
+                    ;opcache.enable_cli=0</code>
+                </pre>
+                <pre class="fragment">
+                    <code class="language-ini" data-trim>
+                    ; Determines if Zend OPCache is enabled for the CLI version of PHP
+                    opcache.enable_cli=1
+                    </code>
+                </pre>
+            </div>
+        </section>
+
+        <section>
+            <pre style="display:inline-block;">
+                <code class="language-php" data-trim>
+                    ------- ------------------- ------------------- ----------------
+                             serialize           igbinary            code
+                    ------- ------------------- ------------------- ----------------
+                     min     0.13 ms - 0 bytes   0.13 ms - 0 bytes   0 ms - 0 bytes
+                     max     0.25 ms - 0 bytes   0.18 ms - 0 bytes   0 ms - 0 bytes
+                     avg     0.18 ms - 0 bytes   0.16 ms - 0 bytes   0 ms - 0 bytes
+                     total   16.55 ms            15.29 ms            0.28 ms 😳
+                    ------- ------------------- ------------------- ----------------
+                     Order   🥉                  🥈                   🥇
+                    ------- ------------------- ------------------- ----------------
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers="|7">
+                final readonly class NewCache
+                {
+                    public function set(string $key, mixed $value): void
+                    {
+                        file_put_contents(
+                            $this->file($key),
+                            '&lt;?php return '.🪄🔮🎩($value).';',
+                        );
+                    }
+
+                    public function get(string $key): mixed
+                    {
+                        return include $this->file($key);
+                    }
+                }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <h3>var_export()</h3>
+            <pre style="display: inline-block;">
+                <code class="language-php" style="text-align: center;" data-trim>
+                var_export(mixed $value, bool $return = false): ?string
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <div class="horizontal horizontal-half">
+                <pre>
+                    <code class="language-php" data-trim>
+                        var_export(null);
+                    </code>
+                </pre>
+                <pre>
+                    <code class="language-php" data-trim>
+                        NULL
+                    </code>
+                </pre>
+            </div>
+            <div class="horizontal horizontal-half">
+                <pre>
+                    <code class="language-php" data-trim>
+                        var_export(true);
+                        var_export(false);
+                    </code>
+                </pre>
+                <pre>
+                    <code class="language-php" data-trim>
+                        true
+                        false
+                    </code>
+                </pre>
+            </div>
+            <div class="horizontal horizontal-half">
+                <pre>
+                    <code class="language-php" data-trim>
+                        var_export(PHP_INT_MAX);
+                    </code>
+                </pre>
+                <pre>
+                    <code class="language-php" data-trim>
+                        9223372036854775807
+                    </code>
+                </pre>
+            </div>
+            <div class="horizontal horizontal-half">
+                <pre>
+                    <code class="language-php" data-trim>
+                        var_export(M_E);
+                    </code>
+                </pre>
+                <pre>
+                    <code class="language-php" data-trim>
+                        2.718281828459045
+                    </code>
+                </pre>
+            </div>
+            <div class="horizontal horizontal-half">
+                <pre>
+                    <code class="language-php" data-trim>
+                        var_export("Hello'\nworld!");
+                    </code>
+                </pre>
+                <pre>
+                    <code class="language-php" data-trim>
+                        'Hello\'
+                        world!'
+                    </code>
+                </pre>
+            </div>
+        </section>
+
+        <section>
+            <div class="horizontal horizontal-half">
+                <pre>
+                    <code class="language-php" data-trim>
+                        var_export([
+                            123,
+                            ['Key' => 'Value'],
+                        ]);
+                    </code>
+                </pre>
+                <pre>
+                    <code class="language-php" data-trim>
+                        array (
+                          0 => 123,
+                          1 =>
+                          array (
+                            'Key' => 'Value',
+                          ),
+                        )
+                    </code>
+                </pre>
+            </div>
+        </section>
+
+        <section>
+            <div class="horizontal horizontal-half">
+                <pre>
+                    <code class="language-php" data-trim>
+                        enum Women
+                        {
+                            case OLGA;
+                        }
+
+                        var_export(Women::OLGA);
+                    </code>
+                </pre>
+                <pre>
+                    <code class="language-php" data-trim>\Women::OLGA</code>
+                </pre>
+            </div>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim>
+                    final class City
+                    {
+                        public function __construct(
+                            public string $name,
+                            public int $code,
+                        ) {}
+                    }
+
+                    var_export(new City('Йошкар-Ола', 8362));
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim>
+                    \City::__set_state(array(
+                        'name' => 'Йошкар-Ола',
+                        'code' => 8362,
+                    ));
+                </code>
+            </pre>
+            <div class="fragment">
+                <pre style="color: #CF5B56">
+                    <code class="no-highlight" data-trim style="white-space: normal;">
+                        PHP Fatal error: Uncaught Error: Call to undefined method City::__set_state()
+                    </code>
+                </pre>
+                <p>🤯</p>
+            </div>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim>
+                    \City::__set_state(array(
+                        'name' => 'Йошкар-Ола',
+                        'code' => 8362,
+                    ));
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim>
+                    \Hydrator::hydrate(\City::class, [
+                        'name' => 'Йошкар-Ола',
+                        'code' => 8362,
+                    ]);
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim>
+                    $hydrator = new \Hydrator();
+                    $object = $hydrator->instantiate(\City::class);
+                    $hydrator->hydrate($object, [
+                        'name' => 'Йошкар-Ола',
+                        'code' => 8362
+                    ]);
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim>
+                    ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
+                        'name' => 'Йошкар-Ола',
+                        'code' => 8362,
+                    ]);
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre style="display: inline-block; margin-bottom: 50px;">
+                <code class="language-php" data-trim data-line-numbers>
+                    ($hydrator = new \Hydrator())->hydrate(
+                        object: $hydrator->instantiate($class),
+                        data: $data,
+                    );
+                </code>
+            </pre>
+            <p class="fragment">🪄 Export object data</p>
+            <p class="fragment">🔮 Instantiate</p>
+            <p class="fragment">🎩 Hydrate</p>
+        </section>
+
+        <section>
+            <h3>🪄 Export object data</h3>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim>
+                final class City
+                {
+                    public function __construct(
+                        public string $name,
+                        public int $code,
+                    ) {}
+                }
+
+                $yoshkarOla = new City('Йошкар-Ола', 8362);
+                </code>
+            </pre>
+            <p>🤔</p>
+        </section>
+
+        <section>
+            <div class="horizontal">
+                <pre>
+                    <code class="language-php" data-trim>
+                        final class City extends Settlement
+                        {
+                            private string $type = 'г.';
+
+                            public function __construct(
+                                string $name,
+                                public int $code,
+                            ) {
+                                parent::__construct($name);
+                            }
+                        }
+                    </code>
+                </pre>
+                <pre>
+                    <code class="language-php" data-trim>
+                        abstract class Settlement
+                        {
+                            private string $type = 'нп.';
+
+                            public function __construct(
+                                protected string $name,
+                            ) {}
+                        }
+                    </code>
+                </pre>
+            </div>
+            <div class="r-stack">
+                <div class="fragment fade-out" data-fragment-index="3">
+                    <pre class="fragment" data-fragment-index="1">
+                        <code class="language-php" data-trim>
+                            var_dump(new City('Йошкар-Ола', 8362));
+                        </code>
+                    </pre>
+                    <pre class="fragment" data-fragment-index="2">
+                        <code class="no-highlight" data-trim>
+                            object(City)#2 (4) {
+                              ["type":"Settlement":private] => string(5) "нп."
+                              ["name":protected] => string(19) "Йошкар-Ола"
+                              ["type":"City":private] => string(3) "г."
+                              ["code"] => int(8362)
+                            }
+                        </code>
+                    </pre>
+                </div>
+                <div class="fragment fade-out" data-fragment-index="6">
+                    <pre class="fragment" data-fragment-index="4">
+                        <code class="language-php" data-trim>
+                            echo serialize(new City('Йошкар-Ола', 8362));
+                        </code>
+                    </pre>
+                    <pre class="fragment" data-fragment-index="5">
+                        <code class="no-highlight" data-trim style="white-space: normal; color: grey;" data-noescape>
+                            O:4:"City":4:{s:16:"<span style="color:black;">\0Settlement\0type</span>";s:5:"нп.";s:7:"<span style="color:black;">\0*\0name</span>";s:19:"Йошкар-Ола";s:10:"<span style="color:black;">\0City\0type</span>";s:3:"г.";s:4:"<span style="color:black;">code</span>";i:8362;}
+                        </code>
+                    </pre>
+                </div>
+                <div class="fragment fade-out" data-fragment-index="9">
+                    <pre class="fragment" data-fragment-index="7">
+                        <code class="language-php" data-trim>
+                            var_dump((array) new City('Йошкар-Ола', 8362));
+                        </code>
+                    </pre>
+                    <pre class="fragment" data-fragment-index="8">
+                        <code class="no-highlight" data-trim>
+                            array(4) {
+                              ["\0Settlement\0type"] => string(5) "нп."
+                              ["\0*\0name"] => string(19) "Йошкар-Ола"
+                              ["\0City\0type"] => string(3) "г."
+                              ["code"] => int(8362)
+                            }
+                        </code>
+                    </pre>
+                </div>
+                <div class="fragment fade-in">
+                    <pre>
+                        <code class="language-php" data-trim>
+                            ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
+                                "\0Settlement\0type" => 'нп.',
+                                "\0*\0name" => 'Йошкар-Ола',
+                                "\0City\0type" => 'г.',
+                                'code' => 8362,
+                            ])
+                        </code>
+                    </pre>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h3>🔮 Instantiate</h3>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim>
+                    final class City
+                    {
+                        private function __construct(string $name, int $code)
+                        {
+                            $this->title = $name;
+                            $this->number = $code;
+
+                            // logic
+                        }
+                    }
+                </code>
+            </pre>
+            <pre>
+                <code class="language-php" data-trim>
+                    final class Hydrator
+                    {
+                        /**
+                         * @template T of object
+                         * @param class-string&lt;T&gt; $class
+                         * @return T
+                         */
+                        public function instantiate(string $class): object
+                        {
+                            // TODO
+                        }
+                    }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim>
+                    final class Hydrator
+                    {
+                        /**
+                         * @template T of object
+                         * @param class-string&lt;T&gt; $class
+                         * @return T
+                         */
+                        public function instantiate(string $class): object
+                        {
+                            $reflClass = new ReflectionClass($class);
+
+                            return $reflClass->newInstanceWithoutConstructor();
+                        }
+                    }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers="3-6,15-16">
+                    final class Hydrator
+                    {
+                        /**
+                         * @var array&lt;class-string, ReflectionClass&gt;
+                         */
+                        private array $reflClasses = [];
+
+                        /**
+                         * @template T of object
+                         * @param class-string&lt;T&gt; $class
+                         * @return T
+                         */
+                        public function instantiate(string $class): object
+                        {
+                            $this->reflClasses[$class] ??= new ReflectionClass($class);
+                            $reflClass = $this->reflClasses[$class];
+
+                            return $reflClass->newInstanceWithoutConstructor();
+                        }
+                    }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <h3>🎩 Hydrate</h3>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim>
+                    final class Hydrator
+                    {
+                        /**
+                         * @template T of object
+                         * @param T $object
+                         * @param array&lt;non-empty-string, mixed&gt; $data
+                         * @return T
+                         */
+                        public function hydrate(object $object, array $data): object
+                        {
+                            // TODO
+                        }
+                    }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers="|12">
+                    final class Hydrator
+                    {
+                        /**
+                         * @template T of object
+                         * @param T $object
+                         * @param array&lt;non-empty-string, mixed&gt; $data
+                         * @return T
+                         */
+                        public function hydrate(object $object, array $data): object
+                        {
+                            foreach ($data as $key => $value) {
+                                $property = $this->property($object::class, $key);
+                                $property->setValue($object, $value);
+                            }
+
+                            return $object;
+                        }
+                    }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="no-highlight" data-trim>
+                    array(4) {
+                      ["\0Settlement\0type"] => string(5) "нп."
+                      ["\0*\0name"] => string(19) "Йошкар-Ола"
+                      ["\0City\0type"] => string(3) "г."
+                      ["code"] => int(8362)
+                    }
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim data-line-numbers="|3|5-7|9-11|13|">
+                    private function property(string $class, string $key): ReflectionProperty
+                    {
+                        $parts = explode("\0", $key);
+
+                        if (count($parts) === 1) {
+                            return new ReflectionProperty($class, $key);
+                        }
+
+                        if ($parts[1] === '*') {
+                            return new ReflectionProperty($class, $parts[2]);
+                        }
+
+                        return new ReflectionProperty($parts[1], $parts[2]);
+                    }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <h3>🪄🔮🎩 = Exporter</h3>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers>
+                    final class Exporter
+                    {
+                        // Здесь позже добавим стейт
+
+                        private function __construct() {}
+
+                        public static function export(mixed $value): string
+                        {
+                            return (new self())->exportMixed($value);
+                        }
+
+                        private function exportMixed(mixed $value): string
+                        {
+                            // TODO
+                        }
+                    }
+                </code>
+            </pre>
+            <pre>
+                <code class="language-php" data-trim>
+                    Exporter::export($value);
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers="|3-5|7-9|11-13|15-17|19-22|">
+                    private function exportMixed(mixed $value): string
+                    {
+                        if ($value === null) {
+                            return 'null';
+                        }
+
+                        if (is_scalar($value)) {
+                            return var_export($value, true);
+                        }
+
+                        if (is_array($value)) {
+                            return $this->exportArray($value);
+                        }
+
+                        if (is_object($value)) {
+                            return $this->exportObject($value);
+                        }
+
+                        throw new InvalidArgumentException(sprintf(
+                            'Export of %s is not supported.',
+                            get_debug_type($value),
+                        ));
+                    }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers>
+                    private function exportArray(array $array): string
+                    {
+                        $code = '[';
+
+                        foreach ($array as $key => $value) {
+                            $code .= $this->exportMixed($key).'=>';
+                            $code .= $this->exportMixed($value).',';
+                        }
+
+                        return $code.']';
+                    }
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim>
+                    echo Exporter::export([123, ['Key' => 'Value']]);
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim>
+                    [0=>123,1=>['Key'=>'Value',],]
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers="4,7-11">
+                    private function exportArray(array $array): string
+                    {
+                        $code = '[';
+                        $first = true;
+
+                        foreach ($array as $key => $value) {
+                            if ($first) {
+                                $first = false;
+                            } else {
+                                $code .= ',';
+                            }
+
+                            $code .= $this->exportMixed($key).'=>';
+                            $code .= $this->exportMixed($value);
+                        }
+
+                        return $code.']';
+                    }
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim>
+                    echo Exporter::export([123, ['Key' => 'Value']]);
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim>
+                    [0=>123,1=>['Key'=>'Value']]
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers="5,10-12">
+                    private function exportArray(array $array): string
+                    {
+                        $code = '[';
+                        $first = true;
+                        $list = array_is_list($array);
+
+                        foreach ($array as $key => $value) {
+                            if ($first) { ... }
+
+                            if (!$list) {
+                                $code .= $this->exportMixed($key).'=>';
+                            }
+
+                            $code .= $this->exportMixed($value);
+                        }
+
+                        return $code.']';
+                    }
+                </code>
+            </pre>
+            <pre>
+                <code class="language-php" data-trim>
+                    echo Exporter::export([123, ['Key' => 'Value']]);
+                </code>
+            </pre>
+            <pre>
+                <code class="language-php" data-trim>
+                    [123,['Key'=>'Value']]
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers>
+                    private function exportObject(object $object): string
+                    {
+                        return sprintf(
+                            '($h = new \\%s())->hydrate($h->instantiate(\\%s::class), %s)',
+                            Hydrator::class,
+                            $object::class,
+                            $this->exportArray((array) $object),
+                        );
+                    }
+                </code>
+            </pre>
+            <pre>
+                <code class="language-php" data-trim>
+                    echo Exporter::export(new City('Йошкар-Ола', 8362));
+                </code>
+            </pre>
+            <pre>
+                <code class="language-php" data-trim>
+                    ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
+                        "\0Settlement\0type" => 'нп.',
+                        "\0*\0name" => 'Йошкар-Ола',
+                        "\0City\0type" => 'г.',
+                        'code' => 8362,
+                    ])
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim>
+                    echo Exporter::export([
+                        new City('Йошкар-Ола', 8362),
+                        new City('Йошкар-Ола', 8362),
+                    ]);
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim data-line-numbers="|2,8">
+                    [
+                        ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
+                            "\0Settlement\0type" => 'нп.',
+                            "\0*\0name" => 'Йошкар-Ола',
+                            "\0City\0type" => 'г.',
+                            'code' => 8362,
+                        ]),
+                        ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
+                            "\0Settlement\0type" => 'нп.',
+                            "\0*\0name" => 'Йошкар-Ола',
+                            "\0City\0type" => 'г.',
+                            'code' => 8362,
+                        ]),
+                    ]
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers>
+                    private function exportObject(object $object): string
+                    {
+                        return sprintf(
+                            '%s->hydrate(%s->instantiate(\\%s::class), %s)',
+                            $this->hydrator(),
+                            $this->hydrator(),
+                            $object::class,
+                            $this->exportArray((array) $object),
+                        );
+                    }
+
+                    private bool $hydratorInitialized = false;
+
+                    private function hydrator(): string
+                    {
+                        if ($this->hydratorInitialized) {
+                            return '$h';
+                        }
+
+                        $this->hydratorInitialized = true;
+
+                        return sprintf('($h = new \\%s())', Hydrator::class);
+                    }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim>
+                    echo Exporter::export([
+                        new City('Йошкар-Ола', 8362),
+                        new City('Йошкар-Ола', 8362),
+                    ]);
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim data-line-numbers="|2,8">
+                    [
+                        ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
+                            "\0Settlement\0type" => 'нп.',
+                            "\0*\0name" => 'Йошкар-Ола',
+                            "\0City\0type" => 'г.',
+                            'code' => 8362,
+                        ]),
+                        $h->hydrate($h->instantiate(\City::class), [
+                            "\0Settlement\0type" => 'нп.',
+                            "\0*\0name" => 'Йошкар-Ола',
+                            "\0City\0type" => 'г.',
+                            'code' => 8362,
+                        ]),
+                    ]
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim>
+                    $yoshkarOla = new City('Йошкар-Ола', 8362);
+
+                    echo Exporter::export([$yoshkarOla, $yoshkarOla]);
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim data-line-numbers="|2,8">
+                    [
+                        ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
+                            "\0Settlement\0type" => 'нп.',
+                            "\0*\0name" => 'Йошкар-Ола',
+                            "\0City\0type" => 'г.',
+                            'code' => 8362,
+                        ]),
+                        $h->hydrate($h->instantiate(\City::class), [
+                            "\0Settlement\0type" => 'нп.',
+                            "\0*\0name" => 'Йошкар-Ола',
+                            "\0City\0type" => 'г.',
+                            'code' => 8362,
+                        ]),
+                    ]
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim>
+                    $yoshkarOla = new City('Йошкар-Ола', 8362);
+
+                    echo serialize([$yoshkarOla, $yoshkarOla]);
+                </code>
+            </pre>
+            <div class="fragment">
+                <pre>
+                    <code class="no-highlight" style="color: grey; white-space: normal;" data-trim data-noescape>
+                        a:2:{i:0;O:4:"City":4:{s:16:"\0Settlement\0type";s:5:"нп.";s:7:"\0*\0name";s:19:"Йошкар-Ола";s:10:"\0City\0type";s:3:"г.";s:4:"code";i:8362;}<span style="color:black;">i:1;r:2;</span>}
+                    </code>
+                </pre>
+                <p>🤔</p>
+            </div>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim>
+                    $yoshkarOla = new City('Йошкар-Ола', 8362);
+
+                    echo Exporter::export([$yoshkarOla, $yoshkarOla]);
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim data-line-numbers="|3,11|">
+                    [
+                        ($h = new \Hydrator())->hydrate(
+                            $o0 = $h->instantiate(\City::class),
+                            [
+                                "\0Settlement\0type" => 'нп.',
+                                "\0*\0name" => 'Йошкар-Ола',
+                                "\0City\0type" => 'г.',
+                                'code' => 8362,
+                            ],
+                        ),
+                        $o0,
+                    ]
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers="|1-4|12|13|16,18|8-10|">
+                    /**
+                     * @var SplObjectStorage&lt;object, non-empty-string&gt;
+                     */
+                    private SplObjectStorage $objectVariables;
+
+                    private function exportObject(object $object): string
+                    {
+                        if ($this->objectVariables->contains($object)) {
+                            return $this->objectVariables[$object];
+                        }
+
+                        $objectVariable = '$o'.$this->objectVariables->count();
+                        $this->objectVariables->attach($object, $objectVariable);
+
+                        return sprintf(
+                            '%s->hydrate(%s=%s->instantiate(\\%s::class), %s)',
+                            $this->hydrator(),
+                            $objectVariable,
+                            $this->hydrator(),
+                            $object::class,
+                            $this->exportArray((array) $object),
+                        );
+                    }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers>
+                    final class SelfReference
+                    {
+                        private self $selfReference;
+
+                        public function __construct()
+                        {
+                            $this->selfReference = $this;
+                        }
+                    }
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim data-line-numbers>
+                    echo Exporter::export(new SelfReference());
+                </code>
+            </pre>
+            <pre class="fragment">
+                <code class="language-php" data-trim data-line-numbers="|1-4,8-13,16,18|">
+                    ($h = new \Hydrator())->hydrate(
+                        $o0 = $h->instantiate(\SelfReference::class),
+                        ["\0SelfReference\0selfReference" => $o0],
+                    )
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <h3>TODO:</h3>
+            <ul>
+                <li>internal PHP classes</li>
+                <li>readonly properties</li>
+                <li><code class="hljs-title function_">__sleep</code></li>
+                <li><code class="hljs-title function_">__wakeup</code></li>
+                <li><code>Serializable</code></li>
+                <li><code class="hljs-title function_">__serialize</code></li>
+                <li><code class="hljs-title function_">__unserialize</code></li>
+            </ul>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers="7|">
+                final readonly class NewCache
+                {
+                    public function set(string $key, mixed $value): void
+                    {
+                        file_put_contents(
+                            $this->file($key),
+                            '&lt;?php return '.Exporter::export($value).';',
+                        );
+                    }
+
+                    public function get(string $key): mixed
+                    {
+                        return include $this->file($key);
+                    }
+                }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers="|3-4|6-9|13|11,15-18|">
+                    private function set(string $key, mixed $value): void
+                    {
+                        $file = $this->file($key);
+                        $directory = dirname($file);
+
+                        $tmp = $directory.'/'.uniqid(more_entropy: true);
+                        $handle = fopen($tmp, 'x');
+                        fwrite($handle, '&lt;?php return'.Exporter::export($value).';');
+                        fclose($handle);
+
+                        touch($tmp, $_SERVER['REQUEST_TIME'] - 10);
+
+                        rename($tmp, $file);
+
+                        if (self::opcacheEnabled()) {
+                            opcache_invalidate($file, true);
+                            opcache_compile_file($file);
+                        }
+                    }
+                </code>
+            </pre>
+        </section>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+    Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        plugins: [RevealHighlight],
+        slideNumber: true,
+        autoAnimate: true,
+    });
+</script>
+</body>
+</html>
