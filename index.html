@@ -93,20 +93,20 @@
                     ) {}
                 }
 
-                $yoshkarOla = new City('Йошкар-Ола', 8362);
+                $rnd = new City('Ростов-на-Дону', 863);
 
-                $basicCache->set($yoshkarOla);
+                $basicCache->set($rnd);
                 </code>
             </pre>
             <pre class="fragment">
                 <code class="nohighlight" data-trim>
-                    O:4:"City":2:{s:4:"name";s:19:"Йошкар-Ола";s:4:"code";i:8362;}
+                    O:4:"City":2:{s:4:"name";s:26:"Ростов-на-Дону";s:4:"code";i:863;}
                 </code>
             </pre>
             <p class="fragment">🤔</p>
             <pre class="fragment">
                 <code class="language-php" data-trim data-line-numbers>
-                    &lt;?php return new City('Йошкар-Ола', 8362);
+                    &lt;?php return new City('Ростов-на-Дону', 863);
                 </code>
             </pre>
         </section>
@@ -136,9 +136,9 @@
         <section>
             <pre>
                 <code class="language-php" data-trim data-line-numbers>
-                    file_put_contents('serialize', serialize($yoshkarOla));
-                    file_put_contents('igbinary', igbinary_serialize($yoshkarOla));
-                    file_put_contents('code', "&lt;?php return new City('Йошка...");
+                    file_put_contents('serialize', serialize($rnd));
+                    file_put_contents('igbinary', igbinary_serialize($rnd));
+                    file_put_contents('code', "&lt;?php return new City('Ростов...");
 
                     DragonCode\Benchmark\Benchmark::start()
                         ->compare([
@@ -357,14 +357,14 @@
                         ) {}
                     }
 
-                    var_export(new City('Йошкар-Ола', 8362));
+                    var_export(new City('Ростов-на-Дону', 863));
                 </code>
             </pre>
             <pre class="fragment">
                 <code class="language-php" data-trim data-line-numbers>
                     \City::__set_state(array(
-                        'name' => 'Йошкар-Ола',
-                        'code' => 8362,
+                        'name' => 'Ростов-на-Дону',
+                        'code' => 863,
                     ));
                 </code>
             </pre>
@@ -382,16 +382,16 @@
             <pre>
                 <code class="language-php" data-trim data-line-numbers>
                     \City::__set_state(array(
-                        'name' => 'Йошкар-Ола',
-                        'code' => 8362,
+                        'name' => 'Ростов-на-Дону',
+                        'code' => 863,
                     ));
                 </code>
             </pre>
             <pre class="fragment">
                 <code class="language-php" data-trim data-line-numbers>
                     \Hydrator::hydrate(\City::class, [
-                        'name' => 'Йошкар-Ола',
-                        'code' => 8362,
+                        'name' => 'Ростов-на-Дону',
+                        'code' => 863,
                     ]);
                 </code>
             </pre>
@@ -400,16 +400,16 @@
                     $hydrator = new \Hydrator();
                     $object = $hydrator->instantiate(\City::class);
                     $hydrator->hydrate($object, [
-                        'name' => 'Йошкар-Ола',
-                        'code' => 8362
+                        'name' => 'Ростов-на-Дону',
+                        'code' => 863
                     ]);
                 </code>
             </pre>
             <pre class="fragment">
                 <code class="language-php" data-trim data-line-numbers>
                     ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
-                        'name' => 'Йошкар-Ола',
-                        'code' => 8362,
+                        'name' => 'Ростов-на-Дону',
+                        'code' => 863,
                     ]);
                 </code>
             </pre>
@@ -444,7 +444,7 @@
                     ) {}
                 }
 
-                $yoshkarOla = new City('Йошкар-Ола', 8362);
+                $rnd = new City('Ростов-на-Дону', 863);
                 </code>
             </pre>
             <p>🤔</p>
@@ -484,16 +484,16 @@
                 <div class="fragment fade-out" data-fragment-index="3">
                     <pre class="fragment" data-fragment-index="1">
                         <code class="language-php" data-trim>
-                            var_dump(new City('Йошкар-Ола', 8362));
+                            var_dump(new City('Ростов-на-Дону', 863));
                         </code>
                     </pre>
                     <pre class="fragment" data-fragment-index="2">
                         <code class="nohighlight" data-trim>
                             object(City)#2 (4) {
                               ["type":"Settlement":private] => string(5) "нп."
-                              ["name":protected] => string(19) "Йошкар-Ола"
+                              ["name":protected] => string(19) "Ростов-на-Дону"
                               ["type":"City":private] => string(3) "г."
-                              ["code"] => int(8362)
+                              ["code"] => int(863)
                             }
                         </code>
                     </pre>
@@ -501,28 +501,28 @@
                 <div class="fragment fade-out" data-fragment-index="6">
                     <pre class="fragment" data-fragment-index="4">
                         <code class="language-php" data-trim>
-                            echo serialize(new City('Йошкар-Ола', 8362));
+                            echo serialize(new City('Ростов-на-Дону', 863));
                         </code>
                     </pre>
                     <pre class="fragment" data-fragment-index="5">
                         <code class="nohighlight" data-trim style="white-space: normal; color: grey;" data-noescape>
-                            O:4:"City":4:{s:16:"<span style="color:black;">\0Settlement\0type</span>";s:5:"нп.";s:7:"<span style="color:black;">\0*\0name</span>";s:19:"Йошкар-Ола";s:10:"<span style="color:black;">\0City\0type</span>";s:3:"г.";s:4:"<span style="color:black;">code</span>";i:8362;}
+                            O:4:"City":4:{s:16:"<span style="color:black;">\0Settlement\0type</span>";s:5:"нп.";s:7:"<span style="color:black;">\0*\0name</span>";s:26:"Ростов-на-Дону";s:10:"<span style="color:black;">\0City\0type</span>";s:3:"г.";s:4:"<span style="color:black;">code</span>";i:863;}
                         </code>
                     </pre>
                 </div>
                 <div class="fragment fade-out" data-fragment-index="9">
                     <pre class="fragment" data-fragment-index="7">
                         <code class="language-php" data-trim>
-                            var_dump((array) new City('Йошкар-Ола', 8362));
+                            var_dump((array) new City('Ростов-на-Дону', 863));
                         </code>
                     </pre>
                     <pre class="fragment" data-fragment-index="8">
                         <code class="nohighlight" data-trim>
                             array(4) {
                               ["\0Settlement\0type"] => string(5) "нп."
-                              ["\0*\0name"] => string(19) "Йошкар-Ола"
+                              ["\0*\0name"] => string(19) "Ростов-на-Дону"
                               ["\0City\0type"] => string(3) "г."
-                              ["code"] => int(8362)
+                              ["code"] => int(863)
                             }
                         </code>
                     </pre>
@@ -532,9 +532,9 @@
                         <code class="language-php" data-trim>
                             ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
                                 "\0Settlement\0type" => 'нп.',
-                                "\0*\0name" => 'Йошкар-Ола',
+                                "\0*\0name" => 'Ростов-на-Дону',
                                 "\0City\0type" => 'г.',
-                                'code' => 8362,
+                                'code' => 863,
                             ])
                         </code>
                     </pre>
@@ -681,9 +681,9 @@
                 <code class="nohighlight" data-trim>
                     array(4) {
                       ["\0Settlement\0type"] => string(5) "нп."
-                      ["\0*\0name"] => string(19) "Йошкар-Ола"
+                      ["\0*\0name"] => string(19) "Ростов-на-Дону"
                       ["\0City\0type"] => string(3) "г."
-                      ["code"] => int(8362)
+                      ["code"] => int(863)
                     }
                 </code>
             </pre>
@@ -883,16 +883,16 @@
             </pre>
             <pre class="fragment">
                 <code class="language-php" data-trim data-line-numbers>
-                    echo Exporter::export(new City('Йошкар-Ола', 8362));
+                    echo Exporter::export(new City('Ростов-на-Дону', 863));
                 </code>
             </pre>
             <pre class="fragment">
                 <code class="language-php" data-trim data-line-numbers>
                     ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
                         "\0Settlement\0type" => 'нп.',
-                        "\0*\0name" => 'Йошкар-Ола',
+                        "\0*\0name" => 'Ростов-на-Дону',
                         "\0City\0type" => 'г.',
-                        'code' => 8362,
+                        'code' => 863,
                     ])
                 </code>
             </pre>
@@ -902,8 +902,8 @@
             <pre>
                 <code class="language-php" data-trim data-line-numbers>
                     echo Exporter::export([
-                        new City('Йошкар-Ола', 8362),
-                        new City('Йошкар-Ола', 8362),
+                        new City('Ростов-на-Дону', 863),
+                        new City('Ростов-на-Дону', 863),
                     ]);
                 </code>
             </pre>
@@ -912,15 +912,15 @@
                     [
                         ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
                             "\0Settlement\0type" => 'нп.',
-                            "\0*\0name" => 'Йошкар-Ола',
+                            "\0*\0name" => 'Ростов-на-Дону',
                             "\0City\0type" => 'г.',
-                            'code' => 8362,
+                            'code' => 863,
                         ]),
                         ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
                             "\0Settlement\0type" => 'нп.',
-                            "\0*\0name" => 'Йошкар-Ола',
+                            "\0*\0name" => 'Ростов-на-Дону',
                             "\0City\0type" => 'г.',
-                            'code' => 8362,
+                            'code' => 863,
                         ]),
                     ]
                 </code>
@@ -961,8 +961,8 @@
             <pre>
                 <code class="language-php" data-trim data-line-numbers>
                     echo Exporter::export([
-                        new City('Йошкар-Ола', 8362),
-                        new City('Йошкар-Ола', 8362),
+                        new City('Ростов-на-Дону', 863),
+                        new City('Ростов-на-Дону', 863),
                     ]);
                 </code>
             </pre>
@@ -971,15 +971,15 @@
                     [
                         ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
                             "\0Settlement\0type" => 'нп.',
-                            "\0*\0name" => 'Йошкар-Ола',
+                            "\0*\0name" => 'Ростов-на-Дону',
                             "\0City\0type" => 'г.',
-                            'code' => 8362,
+                            'code' => 863,
                         ]),
                         $h->hydrate($h->instantiate(\City::class), [
                             "\0Settlement\0type" => 'нп.',
-                            "\0*\0name" => 'Йошкар-Ола',
+                            "\0*\0name" => 'Ростов-на-Дону',
                             "\0City\0type" => 'г.',
-                            'code' => 8362,
+                            'code' => 863,
                         ]),
                     ]
                 </code>
@@ -989,9 +989,9 @@
         <section>
             <pre>
                 <code class="language-php" data-trim data-line-numbers>
-                    $yoshkarOla = new City('Йошкар-Ола', 8362);
+                    $rnd = new City('Ростов-на-Дону', 863);
 
-                    echo Exporter::export([$yoshkarOla, $yoshkarOla]);
+                    echo Exporter::export([$rnd, $rnd]);
                 </code>
             </pre>
             <pre class="fragment">
@@ -999,15 +999,15 @@
                     [
                         ($h = new \Hydrator())->hydrate($h->instantiate(\City::class), [
                             "\0Settlement\0type" => 'нп.',
-                            "\0*\0name" => 'Йошкар-Ола',
+                            "\0*\0name" => 'Ростов-на-Дону',
                             "\0City\0type" => 'г.',
-                            'code' => 8362,
+                            'code' => 863,
                         ]),
                         $h->hydrate($h->instantiate(\City::class), [
                             "\0Settlement\0type" => 'нп.',
-                            "\0*\0name" => 'Йошкар-Ола',
+                            "\0*\0name" => 'Ростов-на-Дону',
                             "\0City\0type" => 'г.',
-                            'code' => 8362,
+                            'code' => 863,
                         ]),
                     ]
                 </code>
@@ -1017,15 +1017,15 @@
         <section>
             <pre>
                 <code class="language-php" data-trim data-line-numbers>
-                    $yoshkarOla = new City('Йошкар-Ола', 8362);
+                    $rnd = new City('Ростов-на-Дону', 863);
 
-                    echo serialize([$yoshkarOla, $yoshkarOla]);
+                    echo serialize([$rnd, $rnd]);
                 </code>
             </pre>
             <div class="fragment">
                 <pre>
                     <code class="nohighlight" style="color: grey; white-space: normal;" data-trim data-noescape>
-                        a:2:{i:0;O:4:"City":4:{s:16:"\0Settlement\0type";s:5:"нп.";s:7:"\0*\0name";s:19:"Йошкар-Ола";s:10:"\0City\0type";s:3:"г.";s:4:"code";i:8362;}<span style="color:black;">i:1;r:2;</span>}
+                        a:2:{i:0;O:4:"City":4:{s:16:"\0Settlement\0type";s:5:"нп.";s:7:"\0*\0name";s:26:"Ростов-на-Дону";s:10:"\0City\0type";s:3:"г.";s:4:"code";i:863;}<span style="color:black;">i:1;r:2;</span>}
                     </code>
                 </pre>
                 <p>🤔</p>
@@ -1035,9 +1035,9 @@
         <section>
             <pre>
                 <code class="language-php" data-trim data-line-numbers>
-                    $yoshkarOla = new City('Йошкар-Ола', 8362);
+                    $rnd = new City('Ростов-на-Дону', 863);
 
-                    echo Exporter::export([$yoshkarOla, $yoshkarOla]);
+                    echo Exporter::export([$rnd, $rnd]);
                 </code>
             </pre>
             <pre class="fragment">
@@ -1047,9 +1047,9 @@
                             $o0 = $h->instantiate(\City::class),
                             [
                                 "\0Settlement\0type" => 'нп.',
-                                "\0*\0name" => 'Йошкар-Ола',
+                                "\0*\0name" => 'Ростов-на-Дону',
                                 "\0City\0type" => 'г.',
-                                'code' => 8362,
+                                'code' => 863,
                             ],
                         ),
                         $o0,
@@ -1091,9 +1091,9 @@
         <section>
             <pre>
                 <code class="language-php" data-trim data-line-numbers>
-                    $yoshkarOla = new City('Йошкар-Ола', 8362);
+                    $rnd = new City('Ростов-на-Дону', 863);
 
-                    echo Exporter::export([$yoshkarOla, $yoshkarOla]);
+                    echo Exporter::export([$rnd, $rnd]);
                 </code>
             </pre>
             <pre class="fragment">
@@ -1103,9 +1103,9 @@
                             $o0 = $h->instantiate(\City::class),
                             [
                                 "\0Settlement\0type" => 'нп.',
-                                "\0*\0name" => 'Йошкар-Ола',
+                                "\0*\0name" => 'Ростов-на-Дону',
                                 "\0City\0type" => 'г.',
-                                'code' => 8362,
+                                'code' => 863,
                             ],
                         ),
                         $o0,
