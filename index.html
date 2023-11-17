@@ -178,16 +178,41 @@
             <div class="r-stack">
                 <pre>
                     <code class="language-ini" data-trim>
-                    ; Determines if Zend OPCache is enabled for the CLI version of PHP
-                    ;opcache.enable_cli=0</code>
+                        ; Determines if Zend OPCache is enabled for the CLI version of PHP
+                        ;opcache.enable_cli=0
+                    </code>
                 </pre>
                 <pre class="fragment">
                     <code class="language-ini" data-trim>
-                    ; Determines if Zend OPCache is enabled for the CLI version of PHP
-                    opcache.enable_cli=1
+                        ; Determines if Zend OPCache is enabled for the CLI version of PHP
+                        opcache.enable_cli=1
                     </code>
                 </pre>
             </div>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers="4">
+                    file_put_contents('serialize', serialize($rnd));
+                    file_put_contents('igbinary', igbinary_serialize($rnd));
+                    file_put_contents('code', "&lt;?php return new City('Ростов...");
+                    touch('code', time() - 10);
+
+                    DragonCode\Benchmark\Benchmark::start()
+                        ->compare([
+                            'serialized' => static function (): void {
+                                unserialize(file_get_contents('serialized'));
+                            },
+                            'igbinary' => static function (): void {
+                                igbinary_unserialize(file_get_contents('igbinary'));
+                            },
+                            'code' => static function (): void {
+                                include 'code';
+                            },
+                        ]);
+                </code>
+            </pre>
         </section>
 
         <section>

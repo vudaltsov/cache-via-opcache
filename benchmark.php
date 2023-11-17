@@ -15,12 +15,7 @@ $yoshkarOla = new City('Йошкар-Ола', 8362);
 file_put_contents('var/serialize', serialize($yoshkarOla));
 file_put_contents('var/igbinary', igbinary_serialize($yoshkarOla));
 file_put_contents('var/code', "<?php return new City('Йошкар-Ола', 8362);");
-
-if (ini_get('opcache.enable_cli')) {
-    touch('var/code', time() - 10);
-    opcache_compile_file('var/code');
-    include 'var/code';
-}
+touch('var/code', time() - 10);
 
 DragonCode\Benchmark\Benchmark::start()
     ->withoutData()
