@@ -459,23 +459,6 @@
         </section>
 
         <section>
-            <pre>
-                <code class="language-php" data-trim data-line-numbers>
-                final class City
-                {
-                    public function __construct(
-                        public string $name,
-                        public int $code,
-                    ) {}
-                }
-
-                $rnd = new City('Ростов-на-Дону', 863);
-                </code>
-            </pre>
-            <p>🤔</p>
-        </section>
-
-        <section>
             <div class="horizontal">
                 <pre>
                     <code class="language-php" data-trim>
@@ -574,20 +557,6 @@
         <section>
             <pre>
                 <code class="language-php" data-trim data-line-numbers>
-                    final class City
-                    {
-                        private function __construct(string $name, int $code)
-                        {
-                            $this->title = $name;
-                            $this->number = $code;
-
-                            // logic
-                        }
-                    }
-                </code>
-            </pre>
-            <pre class="fragment">
-                <code class="language-php" data-trim data-line-numbers>
                     final class Hydrator
                     {
                         /**
@@ -598,6 +567,23 @@
                         public function instantiate(string $class): object
                         {
                             // TODO
+                        }
+                    }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers>
+                    final class City
+                    {
+                        private function __construct(string $name, int $code)
+                        {
+                            $this->title = $name;
+                            $this->number = $code;
+
+                            // logic
                         }
                     }
                 </code>
@@ -690,7 +676,7 @@
                         public function hydrate(object $object, array $data): object
                         {
                             foreach ($data as $key => $value) {
-                                $property = $this->property($object::class, $key);
+                                $property = $this->reflectionProperty($object::class, $key);
                                 $property->setValue($object, $value);
                             }
 
@@ -712,9 +698,9 @@
                     }
                 </code>
             </pre>
-            <pre class="fragment">
+            <pre>
                 <code class="language-php" data-trim data-line-numbers="1|3|5-7|9-11|13|">
-                    private function property(string $class, string $key): ReflectionProperty
+                    private function reflectionProperty(string $class, string $key)
                     {
                         $parts = explode("\0", $key);
 
@@ -727,6 +713,31 @@
                         }
 
                         return new ReflectionProperty($parts[1], $parts[2]);
+                    }
+                </code>
+            </pre>
+        </section>
+
+        <section>
+            <pre>
+                <code class="language-php" data-trim data-line-numbers>
+                    final class Hydrator
+                    {
+                        /**
+                         * @template T of object
+                         * @param T $object
+                         * @param array&lt;non-empty-string, mixed&gt; $data
+                         * @return T
+                         */
+                        public function hydrate(object $object, array $data): object
+                        {
+                            foreach ($data as $key => $value) {
+                                $property = $this->reflectionProperty($object::class, $key);
+                                $property->setValue($object, $value);
+                            }
+
+                            return $object;
+                        }
                     }
                 </code>
             </pre>
@@ -759,7 +770,7 @@
             </pre>
             <pre>
                 <code class="language-php" data-trim data-line-numbers>
-                    Exporter::export($value);
+                    $valueAsCode = Exporter::export($value);
                 </code>
             </pre>
         </section>
@@ -824,7 +835,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim data-line-numbers="4,7-11">
+                <code class="language-php" data-trim data-line-numbers="4,7-11|">
                     private function exportArray(array $array): string
                     {
                         $code = '[';
@@ -859,7 +870,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim data-line-numbers="5,10-12">
+                <code class="language-php" data-trim data-line-numbers="5,10-12|">
                     private function exportArray(array $array): string
                     {
                         $code = '[';
@@ -954,7 +965,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim data-line-numbers="12-23|4-6">
+                <code class="language-php" data-trim data-line-numbers="1-10|5-6|12-23|">
                     private function exportObject(object $object): string
                     {
                         return sprintf(
@@ -1066,7 +1077,7 @@
                 </code>
             </pre>
             <pre class="fragment">
-                <code class="language-php" data-trim data-line-numbers="3,11">
+                <code class="language-php" data-trim data-line-numbers>
                     [
                         ($h = new \Hydrator())->hydrate(
                             $o0 = $h->instantiate(\City::class),
@@ -1209,7 +1220,7 @@
 
         <section>
             <pre>
-                <code class="language-php" data-trim data-line-numbers="3-4|6-9|13|11,15-18|">
+                <code class="language-php" data-trim data-line-numbers="3-4|6-9|11|13|15-18|">
                     private function set(string $key, mixed $value): void
                     {
                         $file = $this->file($key);
